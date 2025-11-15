@@ -2,6 +2,12 @@ import UserModel from "../Models/users.model.js";
 import { verifyToken } from "../Utils/crypt.js";
 
 export const authentication = (req, res, next) => {
+  if (!req?.headers.authorization) {
+    const error = new Error("User must login to Add Products!");
+    error.statusCode = 401;
+    return next(error);
+  }
+
   try {
     let token = req?.headers.authorization.split(" ")[1];
     // console.log(token);

@@ -28,7 +28,7 @@ export const getAllProducts = async (req, res, next) => {
     if (price) filter.price = { $lte: price };
     if (rating) filter.rating = { $lte: rating };
 
-    console.log(filter);
+    // console.log(filter);
 
     const products = await ProductModel.find(filter)
       .sort({ [sortBy]: sortDir })
@@ -42,6 +42,67 @@ export const getAllProducts = async (req, res, next) => {
       currentPageContains: products.length,
       totalDocs,
       data: products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//⭐ ---==(ADMIN CONTROLLER)==---
+
+export const addProduct = async (req, res, next) => {
+  try {
+    const product = await ProductModel.create(req.body);
+    res.status(201).json(product);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const singleProduct = async (req, res, next) => {
+  const { productId } = req.params;
+  try {
+    const product = await ProductModel.find({ _id: productId });
+    res.status(201).json(product);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const product = await ProductModel.findByIdAndUpdate(
+      productId,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!product) {
+      const error = new Error("Product not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+    res.status(201).json({
+      message: "Updated Successfully!",
+      product,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const product = await ProductModel.findByIdAndDelete(productId);
+    if (!product) {
+      const error = new Error("Product not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+    res.status(201).json({
+      message: "Deleted Successfully!",
+      product,
     });
   } catch (error) {
     next(error);
