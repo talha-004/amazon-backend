@@ -10,17 +10,13 @@ export const getAllUsers = async (req, res, next) => {
       data: allUser,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      err: error.message,
-    });
+    next(error);
   }
 };
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, termAndConditions } = req.body;
     const hashPassword = await hashPwt(password, 10);
 
     const registerUser = await UserModel.create({
@@ -28,6 +24,7 @@ export const registerUser = async (req, res) => {
       email,
       password: hashPassword,
       role,
+      termAndConditions,
     });
 
     res.status(200).json({
@@ -36,50 +33,47 @@ export const registerUser = async (req, res) => {
       data: registerUser,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      err: error.message,
-    });
+    next(error);
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const user = await UserModel.findOne({ email });
 
-    const registerUser = await UserModel.findOne({ email });
-
-    if (registerUser) {
-      let comparePassword = await comparePwt(password, registerUser.password);
-      if (comparePassword) {
-        const token = generateToken({ userId: registerUser._id });
-        res.status(200).json({
-          success: true,
-          message: "Loggin Successfully",
-          data: {
-            name: registerUser.name,
-            email: registerUser.email,
-            token,
-          },
-        });
-      } else {
-        res.status(401).json({
-          success: false,
-          message: "Invalid Credentials!",
-        });
-      }
-    } else {
-      res.status(401).json({
-        success: false,
-        message: "Invalid Credentials!",
-      });
+    // if user email is not exit
+    if (!user) {
+      const error = new Error("Invalid Credentials!");
+      error.statusCode = 401;
+      return next(error);
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      err: error.message,
+
+    // validate password
+    const isPasswordCorrect = await comparePwt(password, user.password);
+    if (!isPasswordCorrect) {
+      const error = new Error("Invalid Credentials!");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    // if both email adn password is correct
+    const token = generateToken({ userId: user._id });
+    return res.status(200).json({
+      success: true,
+      message: "Login Successfully!",
+      data: {
+        name: user.name,
+        email: user.email,
+        token,
+      },
     });
+  } catch (error) {
+    next(error);
+    // res.status(500).json({
+    //   success: false,
+    //   message: "Internal server error",
+    //   err: error.message,
+    // });
   }
 };

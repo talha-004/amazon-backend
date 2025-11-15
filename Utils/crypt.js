@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-dotenv.config();
+import { env } from "../Config/env.config.js";
 
 export const hashPwt = (plainTxt, salt = 2) => {
   return bcrypt.hash(plainTxt, salt);
@@ -12,9 +11,9 @@ export const comparePwt = (plainTxt, hashPwt) => {
 };
 
 export const generateToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 120 });
+  return jwt.sign(payload, env.JWT_KEY, { expiresIn: 120 });
 };
 
 export const verifyToken = (token) => {
-  return jwt.verify(token, process.env.JWT_KEY);
+  return jwt.verify(token, env.JWT_KEY);
 };

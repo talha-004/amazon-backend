@@ -1,14 +1,14 @@
 import ProductModel from "../Models/products.model.js";
 
-export const getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res, next) => {
   try {
-    let currPage = +req.query.page;
+    let currPage = +req.query.currPage;
     let limit = +req.query.limit;
     let skip = (currPage - 1) * limit;
     // serach
     let search = req.query.search;
     // filter
-    console.log(req.query);
+    // console.log(req.query, currPage, limit, skip);
 
     let brand = req.query.brand;
     let price = +req.query.price;
@@ -21,7 +21,7 @@ export const getAllProducts = async (req, res) => {
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
       ];
     }
     if (brand) filter.brand = { $regex: brand, $options: "i" };
@@ -44,9 +44,6 @@ export const getAllProducts = async (req, res) => {
       data: products,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      err: error.message,
-    });
+    next(error);
   }
 };

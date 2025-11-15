@@ -3,7 +3,8 @@ import { verifyToken } from "../Utils/crypt.js";
 
 export const authentication = (req, res, next) => {
   try {
-    let token = req?.headers.authorization;
+    let token = req?.headers.authorization.split(" ")[1];
+    // console.log(token);
     let tokenIsValid = verifyToken(token);
     if (tokenIsValid) {
       req.userId = tokenIsValid.userId;

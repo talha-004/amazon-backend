@@ -1,26 +1,22 @@
 import express from "express";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import userRoute from "./Routers/users.route.js";
-import productsRoutes from "./Routers/products.route.js";
+import apiRouter from "./Routers/indexRoute.js";
+import { applyMiddleware } from "./config/global.middlewares.js";
+import { env } from "./Config/env.config.js";
+import { dbConnect } from "./Config/db.connect.js";
+import { appErrorHandler } from "./Middlewares/errorHandler.js";
 
 const app = express();
-dotenv.config();
-const PORT = process.env.PORT || 8000;
-app.use(express.json());
-app.use("/api/v1", userRoute);
-app.use("/api/v1", productsRoutes);
 
+//Global Middlewares (cors,json,cookie parser, url encoded)
+applyMiddleware(app);
+
+app.use("/api/v1", apiRouter);
+
+// error middleware (added at last becasue error come after all routes exucation)
+app.use(appErrorHandler);
+
+const PORT = env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`⭐ Server is running on PORT: ${PORT}`);
-  mongoose
-    .connect(process.env.DB_URI)
-    .then(() => {
-      console.log(`DB Connected Successfully!`);
-    })
-    .catch((err) => {
-      res
-        .status(500)
-        .json({ success: false, message: "DB Error", err: err.message });
-    });
+  dbConnect();
 });
