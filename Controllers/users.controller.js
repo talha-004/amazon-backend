@@ -1,19 +1,6 @@
 import UserModel from "../Models/users.model.js";
 import { comparePwt, generateToken, hashPwt } from "../Utils/crypt.js";
 
-export const getAllUsers = async (req, res, next) => {
-  try {
-    let allUser = await UserModel.find();
-    res.status(200).json({
-      success: true,
-      message: "Fetch Data Successfully!",
-      data: allUser,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password, role, termAndConditions } = req.body;
@@ -75,5 +62,37 @@ export const login = async (req, res, next) => {
     //   message: "Internal server error",
     //   err: error.message,
     // });
+  }
+};
+
+export const profile = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+
+    let user = await UserModel.find({ _id: userId });
+    res.status(200).json({
+      success: true,
+      message: "Fetch Data Successfully!",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//⭐ ---==(ADMIN CONTROLLER)==---
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    let totalUsers = await UserModel.countDocuments();
+    let allUser = await UserModel.find();
+    res.status(200).json({
+      success: true,
+      message: "Fetch Data Successfully!",
+      totalUsers,
+      data: allUser,
+    });
+  } catch (error) {
+    next(error);
   }
 };

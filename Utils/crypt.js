@@ -11,7 +11,7 @@ export const comparePwt = (plainTxt, hashPwt) => {
 };
 
 export const generateToken = (payload) => {
-  return jwt.sign(payload, env.JWT_KEY, { expiresIn: 120 });
+  return jwt.sign(payload, env.JWT_KEY, { expiresIn: 600 });
 };
 
 export const verifyToken = (token) => {

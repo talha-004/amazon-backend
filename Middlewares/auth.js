@@ -3,7 +3,7 @@ import { verifyToken } from "../Utils/crypt.js";
 
 export const authentication = (req, res, next) => {
   if (!req?.headers.authorization) {
-    const error = new Error("User must login to Add Products!");
+    const error = new Error("User must be login!");
     error.statusCode = 401;
     return next(error);
   }
