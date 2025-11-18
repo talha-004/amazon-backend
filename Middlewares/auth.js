@@ -2,14 +2,15 @@ import UserModel from "../Models/users.model.js";
 import { verifyToken } from "../Utils/crypt.js";
 
 export const authentication = (req, res, next) => {
-  if (!req?.headers.Authorization) {
+  if (!req?.headers.authorization) {
     const error = new Error("User must be login!");
     error.statusCode = 401;
     return next(error);
   }
+  console.log(req?.headers.authorization.split(" ")[1]);
 
   try {
-    let token = req?.headers.Authorization.split(" ")[1];
+    let token = req?.headers.authorization.split(" ")[1];
     // console.log(token);
     let tokenIsValid = verifyToken(token);
     if (tokenIsValid) {
@@ -17,7 +18,7 @@ export const authentication = (req, res, next) => {
       next();
     }
   } catch (error) {
-    res.status(401).json({ success: false, error: error.message });
+    next(error);
   }
 };
 
